@@ -5,19 +5,19 @@ plugins {
     id("sap.commerce.build.ccv2") version("SNAPSHOT")
 }
 
-val repositoryURL: String by project
-val repositoryUser: String by project
-val repositoryPass: String by project
+// val repositoryURL: String by project
+// val repositoryUser: String by project
+// val repositoryPass: String by project
 
 repositories {
     maven {
-        url = uri(repositoryURL)
+        url = uri("https://common.repositories.cloud.sap/sap-cx-commerce-hybris-repository")
         credentials {
-            username = repositoryUser
-            password = repositoryPass
+            username = System.getenv("SAP_ARTIFACTORY_USER")
+            password = System.getenv("SAP_ARTIFACTORY_PASS")
         }
     }
-    flatDir { dirs("platform") }
+    // flatDir { dirs("platform") }
     mavenCentral()
 }
 
@@ -30,7 +30,13 @@ hybris {
 }
 
 tasks.register("testManifestAccess") {
+    // Option A
+    val ver = CCV2.manifest.map { it.effectiveVersion }
+    inputs.property("version", ver)
+    // Option B
+    val manifest = CCV2.manifest
     doLast {
-        logger.lifecycle("Version: {}, preview? {}", CCV2.manifest.effectiveVersion, CCV2.manifest.preview)
+        val m = manifest.get()
+        logger.lifecycle("Version: {}, preview? {}", ver.get(), m.preview)
     }
 }
